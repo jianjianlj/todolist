@@ -1,82 +1,52 @@
-import React, { Component ,Fragment} from 'react';
-import TodoItem from './TodoItem.js';
-import axios from 'axios';
+import React, { Component } from 'react';
+import 'antd/dist/antd.css';
+import { Input } from 'antd';
+import { Button } from 'antd';
+import { List } from 'antd';
+import store from './store/index.js';
+import { getInputChangeAction, getBtnClickAction,getItemDeleteAction }  from './store/actionCreaters';
+import TodoListUI from './TodoListUI.js';
 
 class TodoList extends Component {
-    constructor (props) {
+
+    constructor(props) {
         super(props);
-        this.state = {
-            inputValue: '',
-            list: []
-        };
+        this.state = store.getState();
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleChangeState = this.handleChangeState.bind(this);
         this.handleBtnClick = this.handleBtnClick.bind(this);
-        this.handleItemClick = this.handleItemClick.bind(this);
-    };
-    handleInputChange () {
-        const value = this.input.value
-        this.setState ( () => ({ //react中的新语法，setState中可以接收一个函数
-            inputValue: value
-        }))
-    };
-    handleBtnClick () {
-        this.setState((prevState) => ({ //prevState就是保存state更改前的数据
-            list: [...prevState.list,prevState.inputValue],
-            inputValue: ''
-        }))
-    };
-    handleItemClick (index) {
-        this.setState((prevState) => {
-            const list = [...prevState.list];
-            list.splice(index,1);
-            return {list};//return {list:list}
-        })
-    };
-    getItem () {
-      return this.state.list.map((item,index) => {
-            return (
-                 <TodoItem 
-                    key={index}
-                    content={item} 
-                    index={index} 
-                    deleteItem={this.handleItemClick}
-                 />
-            )
-        })
-    };
-    componentDidMount() {
-        axios.get("./api/todolist")
-            .then((res) => {
-                this.setState(() => ({
-                    list: [...res.data]
-                }));
-            })
-            .catch(() => {
-                console.log("error");
-            })
+        this.handleItemDelete = this.handleItemDelete.bind(this);
+        this.handleItemDelete = this.handleItemDelete.bind(this);
+        store.subscribe(this.handleChangeState);
     }
-    render () {
+   
+    render() {
         return (
-            <Fragment>
-                <div>
-                    {/*在关联label和input输入框的时候，用Htmlfor 不是for */}
-                    <label htmlFor="insert">输入用户名</label>
-                    <input 
-                        id="insert"
-                        className="input"
-                        value={this.state.inputValue}
-                        onChange={this.handleInputChange}
-                        ref={(input)=>{this.input=input}}
-                     />
-                    <button onClick={this.handleBtnClick}>提交</button>
-                </div>
-                <ul>
-                   { this.getItem() }
-                </ul>
-            </Fragment>
-        );
+            <TodoListUI 
+                inputValue={this.state.inputValue}
+                list={this.state.list}
+                handleInputChange={this.handleInputChange}
+                handleBtnClick={this.handleBtnClick}
+                handleItemDelete={this.handleItemDelete}
+            />
+        )
+    };
+
+    handleInputChange (e) {
+        const action = getInputChangeAction(e.target.value); 
+        store.dispatch(action);
+    };
+    handleChangeState() {
+        this.setState(store.getState);
+    };
+    handleBtnClick() {
+        const action = getBtnClickAction();
+        store.dispatch(action);
+    };
+    handleItemDelete(index) {
+        const action = getItemDeleteAction(index);
+        store.dispatch(action);
     }
 }
 
-export default TodoList;
-
+export default TodoList

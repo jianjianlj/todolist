@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import 'antd/dist/antd.css';
-import axios from 'axios';
 import store from './store/index.js';
-import { getInputChangeAction, getBtnClickAction,getItemDeleteAction,getInitListAction }  from './store/actionCreaters';
+import { getInitList, getInputChangeAction, getBtnClickAction,getItemDeleteAction }  from './store/actionCreaters';
 import TodoListUI from './TodoListUI.js';
 
 class TodoList extends Component {
@@ -30,12 +29,8 @@ class TodoList extends Component {
         )
     };
     componentDidMount() {
-        axios.get(' https://www.easy-mock.com/mock/5cea9ca7f164c93712b29193/list.json').then((res) => {
-            const list = res.data.data.list;
-            console.log(list);
-            const action = getInitListAction(list);
-            store.dispatch(action);
-        })
+        const action = getInitList();
+        store.dispatch(action);
     }
 
     handleInputChange (e) {
